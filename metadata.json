@@ -1,0 +1,5 @@
+{
+  "name": "R Tech Admin",
+  "description": "A comprehensive web administration dashboard for R Tech, featuring employee management, task tracking, CRM, payroll, calendar, and AI-powered idea generation.",
+  "requestFramePermissions": []
+}
