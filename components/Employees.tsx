@@ -576,6 +576,7 @@ const Employees: React.FC = () => {
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [newEmployee, setNewEmployee] = useState<Partial<Employee>>({
     name: '',
@@ -585,7 +586,7 @@ const Employees: React.FC = () => {
     salary: 0,
     status: 'Active',
     phone: '',
-    joinDate: ''
+    joinDate: new Date().toISOString().split('T')[0]
   });
 
   const filteredEmployees = employees.filter(emp => 
@@ -598,26 +599,7 @@ const Employees: React.FC = () => {
 
   const selectedEmployee = employees.find(e => e.id === selectedEmployeeId);
 
-  const handleAddEmployee = () => {
-    if (!newEmployee.name || !newEmployee.email || !newEmployee.department) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    const employeeToAdd: Employee = {
-      id: (employees.length + 1).toString(),
-      name: newEmployee.name,
-      email: newEmployee.email,
-      role: newEmployee.role as EmployeeRole,
-      department: newEmployee.department,
-      salary: Number(newEmployee.salary) || 0,
-      status: newEmployee.status as 'Active' | 'On Leave' | 'Terminated',
-      phone: newEmployee.phone || '',
-      joinDate: newEmployee.joinDate || new Date().toISOString().split('T')[0]
-    };
-
-    setEmployees([...employees, employeeToAdd]);
-    setIsAddModalOpen(false);
+  const resetForm = () => {
     setNewEmployee({
       name: '',
       email: '',
@@ -626,8 +608,58 @@ const Employees: React.FC = () => {
       salary: 0,
       status: 'Active',
       phone: '',
-      joinDate: ''
+      joinDate: new Date().toISOString().split('T')[0]
     });
+    setEditingId(null);
+  };
+
+  const handleSaveEmployee = () => {
+    if (!newEmployee.name || !newEmployee.email || !newEmployee.department) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    if (editingId) {
+      // Edit existing employee
+      setEmployees(employees.map(emp => 
+        emp.id === editingId ? { ...emp, ...newEmployee } as Employee : emp
+      ));
+    } else {
+      // Add new employee
+      const employeeToAdd: Employee = {
+        id: (Math.max(...employees.map(e => parseInt(e.id) || 0), 0) + 1).toString(),
+        name: newEmployee.name!,
+        email: newEmployee.email!,
+        role: newEmployee.role as EmployeeRole,
+        department: newEmployee.department!,
+        salary: Number(newEmployee.salary) || 0,
+        status: newEmployee.status as 'Active' | 'On Leave' | 'Terminated',
+        phone: newEmployee.phone || '',
+        joinDate: newEmployee.joinDate || new Date().toISOString().split('T')[0]
+      };
+      setEmployees([...employees, employeeToAdd]);
+    }
+
+    setIsAddModalOpen(false);
+    resetForm();
+  };
+
+  const openAddModal = () => {
+    resetForm();
+    setIsAddModalOpen(true);
+  };
+
+  const openEditModal = (emp: Employee) => {
+    setNewEmployee(emp);
+    setEditingId(emp.id);
+    setIsAddModalOpen(true);
+  };
+
+  const handleDeleteEmployee = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      setEmployees(employees.filter(e => e.id !== id));
+      if (selectedEmployeeId === id) setSelectedEmployeeId(null);
+    }
   };
 
   if (selectedEmployee) {
@@ -657,7 +689,7 @@ const Employees: React.FC = () => {
           </button>
 
           <button 
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAddModal}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-lg shadow-indigo-200 font-medium"
           >
             <Plus size={18} /> Add Employee
@@ -748,12 +780,14 @@ const Employees: React.FC = () => {
                         <Eye size={18} />
                       </button>
                       <button 
+                        onClick={() => openEditModal(emp)}
                         className="p-2 text-slate-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                         title="Edit Info"
                       >
                         <Edit2 size={18} />
                       </button>
                       <button 
+                        onClick={() => handleDeleteEmployee(emp.id)}
                         className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete Employee"
                       >
@@ -774,7 +808,7 @@ const Employees: React.FC = () => {
         </div>
       </div>
 
-      {/* Modern Add Employee Modal */}
+      {/* Modern Add/Edit Employee Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100">
@@ -782,9 +816,11 @@ const Employees: React.FC = () => {
             <div className="px-8 py-6 bg-gradient-to-r from-indigo-600 to-indigo-800 flex justify-between items-center text-white">
               <div>
                 <h3 className="text-2xl font-bold flex items-center gap-3">
-                  <UserPlus className="text-indigo-200" size={28} /> Add Team Member
+                  <UserPlus className="text-indigo-200" size={28} /> {editingId ? 'Edit Team Member' : 'Add Team Member'}
                 </h3>
-                <p className="text-indigo-100 mt-1 text-sm opacity-90">Enter details to onboard a new employee</p>
+                <p className="text-indigo-100 mt-1 text-sm opacity-90">
+                  {editingId ? 'Update employee details and role' : 'Enter details to onboard a new employee'}
+                </p>
               </div>
               <button 
                 onClick={() => setIsAddModalOpen(false)}
@@ -900,10 +936,10 @@ const Employees: React.FC = () => {
                 Cancel
               </button>
               <button 
-                onClick={handleAddEmployee}
+                onClick={handleSaveEmployee}
                 className="px-8 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transform hover:-translate-y-0.5"
               >
-                Save Employee
+                {editingId ? 'Update Employee' : 'Save Employee'}
               </button>
             </div>
           </div>
