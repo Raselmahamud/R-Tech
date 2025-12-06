@@ -44,11 +44,11 @@ interface OnboardingHistoryItem {
 
 // --- Mock Data ---
 const MOCK_EMPLOYEES: Employee[] = [
-  { id: '1', name: 'Rahim Khan', role: EmployeeRole.MANAGER, email: 'rahim@rtech.com', salary: 2500, status: 'Active', department: 'Management' },
-  { id: '2', name: 'Sultana Jasmine', role: EmployeeRole.DEVELOPER, email: 'jasmine@rtech.com', salary: 1800, status: 'Active', department: 'Engineering' },
-  { id: '3', name: 'Karim Ullah', role: EmployeeRole.DESIGNER, email: 'karim@rtech.com', salary: 1600, status: 'On Leave', department: 'Design' },
-  { id: '4', name: 'David Smith', role: EmployeeRole.HR, email: 'david@rtech.com', salary: 2000, status: 'Active', department: 'Human Resources' },
-  { id: '5', name: 'Fatima Begum', role: EmployeeRole.DEVELOPER, email: 'fatima@rtech.com', salary: 1900, status: 'Active', department: 'Engineering' },
+  { id: '1', name: 'Rahim Khan', role: EmployeeRole.MANAGER, email: 'rahim@rtech.com', phone: '+880 1711 223344', joinDate: '2020-03-15', salary: 2500, status: 'Active', department: 'Management' },
+  { id: '2', name: 'Sultana Jasmine', role: EmployeeRole.DEVELOPER, email: 'jasmine@rtech.com', phone: '+880 1922 334455', joinDate: '2021-06-01', salary: 1800, status: 'Active', department: 'Engineering' },
+  { id: '3', name: 'Karim Ullah', role: EmployeeRole.DESIGNER, email: 'karim@rtech.com', phone: '+880 1833 445566', joinDate: '2022-01-10', salary: 1600, status: 'On Leave', department: 'Design' },
+  { id: '4', name: 'David Smith', role: EmployeeRole.HR, email: 'david@rtech.com', phone: '+880 1644 556677', joinDate: '2019-11-20', salary: 2000, status: 'Active', department: 'Human Resources' },
+  { id: '5', name: 'Fatima Begum', role: EmployeeRole.DEVELOPER, email: 'fatima@rtech.com', phone: '+880 1555 667788', joinDate: '2023-02-14', salary: 1900, status: 'Active', department: 'Engineering' },
 ];
 
 const MOCK_ATTENDANCE: AttendanceLog[] = [
@@ -131,7 +131,7 @@ const EmployeeDetailView: React.FC<{ employee: Employee; onBack: () => void }> =
               <div className="p-2 bg-white rounded-full text-slate-500 shadow-sm"><Phone size={16} /></div>
               <div className="text-sm">
                 <p className="text-slate-400 text-xs">Phone</p>
-                <p className="font-medium text-slate-700">+880 1712 345678</p>
+                <p className="font-medium text-slate-700">{employee.phone || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
@@ -583,7 +583,9 @@ const Employees: React.FC = () => {
     role: EmployeeRole.DEVELOPER,
     department: '',
     salary: 0,
-    status: 'Active'
+    status: 'Active',
+    phone: '',
+    joinDate: ''
   });
 
   const filteredEmployees = employees.filter(emp => 
@@ -609,7 +611,9 @@ const Employees: React.FC = () => {
       role: newEmployee.role as EmployeeRole,
       department: newEmployee.department,
       salary: Number(newEmployee.salary) || 0,
-      status: newEmployee.status as 'Active' | 'On Leave' | 'Terminated'
+      status: newEmployee.status as 'Active' | 'On Leave' | 'Terminated',
+      phone: newEmployee.phone || '',
+      joinDate: newEmployee.joinDate || new Date().toISOString().split('T')[0]
     };
 
     setEmployees([...employees, employeeToAdd]);
@@ -620,7 +624,9 @@ const Employees: React.FC = () => {
       role: EmployeeRole.DEVELOPER,
       department: '',
       salary: 0,
-      status: 'Active'
+      status: 'Active',
+      phone: '',
+      joinDate: ''
     });
   };
 
@@ -681,6 +687,8 @@ const Employees: React.FC = () => {
             <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">Employee Details</th>
+                <th className="px-6 py-4">Phone</th>
+                <th className="px-6 py-4">Join Date</th>
                 <th className="px-6 py-4">Role & Dept</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-right">Salary</th>
@@ -702,6 +710,12 @@ const Employees: React.FC = () => {
                         </div>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-600">
+                    {emp.phone || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-600">
+                    {emp.joinDate || 'N/A'}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">

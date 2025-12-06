@@ -11,6 +11,8 @@ export interface Employee {
   name: string;
   role: EmployeeRole;
   email: string;
+  phone?: string;
+  joinDate?: string;
   salary: number; // Monthly salary
   status: 'Active' | 'On Leave' | 'Terminated';
   department: string;
