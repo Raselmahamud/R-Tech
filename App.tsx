@@ -4,42 +4,9 @@ import Dashboard from './components/Dashboard';
 import Employees from './components/Employees';
 import Tasks from './components/Tasks';
 import IdeaLab from './components/IdeaLab';
+import CRM from './components/CRM'; // Imported the new CRM component
 import { View } from './types';
 import { Bell, Search, UserCircle } from 'lucide-react';
-
-// Simple CRM Component defined inline for brevity as requested by "few files" logic, 
-// though logically separate in larger apps.
-const CRM: React.FC = () => (
-  <div className="space-y-6">
-    <h2 className="text-2xl font-bold text-slate-800">Customer Relationship Management</h2>
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <table className="w-full text-left">
-        <thead className="bg-slate-50">
-          <tr>
-            <th className="px-6 py-4 font-semibold text-slate-600">Client Name</th>
-            <th className="px-6 py-4 font-semibold text-slate-600">Company</th>
-            <th className="px-6 py-4 font-semibold text-slate-600">Status</th>
-            <th className="px-6 py-4 font-semibold text-slate-600">Value</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {[
-            { name: "John Doe", company: "Alpha Corp", status: "Active", value: "$5,000" },
-            { name: "Jane Smith", company: "Beta Ltd", status: "Lead", value: "$2,200" },
-            { name: "Mike Ross", company: "Pearson Hardman", status: "Active", value: "$12,000" },
-          ].map((c, i) => (
-            <tr key={i} className="hover:bg-slate-50">
-              <td className="px-6 py-4">{c.name}</td>
-              <td className="px-6 py-4">{c.company}</td>
-              <td className="px-6 py-4"><span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">{c.status}</span></td>
-              <td className="px-6 py-4 font-mono">{c.value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
 
 // Simple Calendar Component
 const CalendarView: React.FC = () => {

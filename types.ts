@@ -34,13 +34,46 @@ export interface Task {
   dueDate: string;
 }
 
+// --- CRM TYPES ---
+export interface CustomerProject {
+  id: string;
+  name: string;
+  status: 'In Progress' | 'Completed' | 'On Hold';
+  dueDate: string;
+  budget: number;
+}
+
+export interface CustomerPayment {
+  id: string;
+  date: string;
+  amount: number;
+  invoiceId: string;
+  status: 'Paid' | 'Pending' | 'Overdue';
+}
+
+export interface CustomerActivity {
+  id: string;
+  type: 'Call' | 'Email' | 'Meeting' | 'Note';
+  description: string;
+  date: string;
+}
+
 export interface Customer {
   id: string;
   name: string;
   company: string;
   email: string;
+  phone: string;
   status: 'Lead' | 'Active' | 'Churned';
-  revenue: number;
+  revenue: number; // Total Lifetime Value
+  currentProject: string; // For the main table view
+  
+  // Detailed Data
+  projects?: CustomerProject[];
+  payments?: CustomerPayment[];
+  activities?: CustomerActivity[];
+  nextMeeting?: string; // ISO Date string
+  address?: string;
 }
 
 export interface Meeting {
