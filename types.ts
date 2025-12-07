@@ -1,3 +1,4 @@
+
 export enum EmployeeRole {
   ADMIN = 'Admin',
   MANAGER = 'Manager',
@@ -90,6 +91,46 @@ export interface Note {
   content: string;
   tags: string[];
   createdAt: string;
+  color?: string; // Hex code or tailwind class prefix
 }
 
-export type View = 'DASHBOARD' | 'EMPLOYEES' | 'TASKS' | 'CRM' | 'CALENDAR' | 'IDEAS';
+export interface Department {
+  id: string;
+  name: string;
+  head: string;
+  email: string;
+  phone: string;
+  employeeCount: number;
+  budget: number;
+  status: 'Active' | 'Inactive';
+  location: string;
+}
+
+export type View = 'DASHBOARD' | 'EMPLOYEES' | 'DEPARTMENTS' | 'TASKS' | 'CRM' | 'CALENDAR' | 'IDEAS' | 'ATTENDANCE';
+
+// --- ATTENDANCE TYPES ---
+export interface AttendanceRecord {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  role: string;
+  date: string; // YYYY-MM-DD
+  checkIn: string | null; // HH:MM AM/PM
+  checkOut: string | null; // HH:MM AM/PM
+  status: 'Present' | 'Late' | 'Absent' | 'Half Day' | 'On Leave';
+  workHours: number;
+}
+
+// --- CALENDAR TYPES ---
+export type CalendarEventType = 'Task' | 'Meeting' | 'Note' | 'Reminder';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string; // YYYY-MM-DD
+  type: CalendarEventType;
+  time?: string;
+  description?: string;
+  attendees?: string;
+  isCompleted?: boolean;
+}
