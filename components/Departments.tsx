@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Department } from '../types';
 import { 
   Search, Plus, Edit2, Trash2, Building2, Users, DollarSign, 
-  MapPin, X, Briefcase, Mail, Phone, ArrowLeft, Eye, Shield, CheckCircle 
+  MapPin, X, Briefcase, Mail, Phone, ArrowLeft, Eye, Shield, CheckCircle,
+  Filter, ArrowUpDown
 } from 'lucide-react';
 
 // Mock Data
@@ -74,6 +75,10 @@ const Departments: React.FC = () => {
   const [editingDept, setEditingDept] = useState<Department | null>(null);
   const [viewingDept, setViewingDept] = useState<Department | null>(null);
 
+  // Filter & Sort State
+  const [sortBy, setSortBy] = useState('name-asc');
+  const [filterStatus, setFilterStatus] = useState('all');
+
   // Form State
   const [formData, setFormData] = useState<Partial<Department>>({
     name: '',
@@ -86,10 +91,22 @@ const Departments: React.FC = () => {
     location: ''
   });
 
-  const filteredDepartments = departments.filter(d => 
-    d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.head.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDepartments = departments
+    .filter(d => {
+      const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            d.head.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = filterStatus === 'all' || d.status.toLowerCase() === filterStatus;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc': return a.name.localeCompare(b.name);
+        case 'name-desc': return b.name.localeCompare(a.name);
+        case 'budget-high': return b.budget - a.budget;
+        case 'budget-low': return a.budget - b.budget;
+        default: return 0;
+      }
+    });
 
   const totalBudget = departments.reduce((sum, d) => sum + d.budget, 0);
   const totalEmployees = departments.reduce((sum, d) => sum + d.employeeCount, 0);
@@ -344,7 +361,7 @@ const Departments: React.FC = () => {
       {/* Table Container */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center gap-4">
+        <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input 
@@ -354,6 +371,33 @@ const Departments: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+          </div>
+          <div className="flex items-center gap-3">
+             <div className="relative">
+                <ArrowUpDown className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                <select 
+                  className="pl-10 pr-8 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm appearance-none cursor-pointer text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                   <option value="name-asc">Name (A-Z)</option>
+                   <option value="name-desc">Name (Z-A)</option>
+                   <option value="budget-high">Budget (High-Low)</option>
+                   <option value="budget-low">Budget (Low-High)</option>
+                </select>
+             </div>
+             <div className="relative">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                <select 
+                  className="pl-10 pr-8 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm appearance-none cursor-pointer text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                   <option value="all">All Status</option>
+                   <option value="active">Active</option>
+                   <option value="inactive">Inactive</option>
+                </select>
+             </div>
           </div>
         </div>
         
