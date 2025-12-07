@@ -104,6 +104,7 @@ export interface Department {
   budget: number;
   status: 'Active' | 'Inactive';
   location: string;
+  logo?: string;
 }
 
 export type View = 'DASHBOARD' | 'EMPLOYEES' | 'DEPARTMENTS' | 'TASKS' | 'CRM' | 'CALENDAR' | 'IDEAS' | 'ATTENDANCE';

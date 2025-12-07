@@ -4,7 +4,7 @@ import { Department } from '../types';
 import { 
   Search, Plus, Edit2, Trash2, Building2, Users, DollarSign, 
   MapPin, X, Briefcase, Mail, Phone, ArrowLeft, Eye, Shield, CheckCircle,
-  Filter, ArrowUpDown
+  Filter, ArrowUpDown, Upload, RefreshCw, Image as ImageIcon
 } from 'lucide-react';
 
 // Mock Data
@@ -18,7 +18,8 @@ const MOCK_DEPARTMENTS: Department[] = [
     employeeCount: 24, 
     budget: 150000, 
     status: 'Active', 
-    location: 'Floor 3, East Wing' 
+    location: 'Floor 3, East Wing',
+    logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzRmNDZlNSIgcng9IjQwIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjM1ZW0iIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSI4MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVOPC90ZXh0Pjwvc3ZnPg=='
   },
   { 
     id: '2', 
@@ -88,7 +89,8 @@ const Departments: React.FC = () => {
     budget: 0,
     employeeCount: 0,
     status: 'Active',
-    location: ''
+    location: '',
+    logo: ''
   });
 
   const filteredDepartments = departments
@@ -125,7 +127,8 @@ const Departments: React.FC = () => {
         budget: 0,
         employeeCount: 0,
         status: 'Active',
-        location: ''
+        location: '',
+        logo: ''
       });
     }
     setIsModalOpen(true);
@@ -136,6 +139,34 @@ const Departments: React.FC = () => {
       setDepartments(departments.filter(d => d.id !== id));
       if (viewingDept?.id === id) setViewingDept(null);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, logo: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGenerateLogo = () => {
+    if (!formData.name) return;
+    const colors = ['#4f46e5', '#0ea5e9', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    const initials = formData.name.substring(0, 2).toUpperCase();
+    
+    // Create a simple SVG data URL
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="${randomColor}" rx="40" />
+        <text x="50%" y="50%" dy=".35em" fill="white" font-family="sans-serif" font-size="80" font-weight="bold" text-anchor="middle">${initials}</text>
+      </svg>
+    `;
+    const base64 = btoa(svg);
+    setFormData({ ...formData, logo: `data:image/svg+xml;base64,${base64}` });
   };
 
   const handleSave = (e: React.FormEvent) => {
@@ -160,7 +191,8 @@ const Departments: React.FC = () => {
         budget: Number(formData.budget) || 0,
         employeeCount: Number(formData.employeeCount) || 0,
         status: (formData.status as any) || 'Active',
-        location: formData.location || ''
+        location: formData.location || '',
+        logo: formData.logo || ''
       };
       setDepartments([...departments, newDept]);
     }
@@ -183,18 +215,32 @@ const Departments: React.FC = () => {
               <Building2 size={200} />
            </div>
            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              <div>
-                 <h1 className="text-3xl font-bold text-slate-800 mb-2">{viewingDept.name}</h1>
-                 <div className="flex items-center gap-4 text-slate-500">
-                    <span className="flex items-center gap-1.5"><MapPin size={16} className="text-indigo-500"/> {viewingDept.location || 'Main HQ'}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                    <span className={`flex items-center gap-1.5 font-medium ${viewingDept.status === 'Active' ? 'text-green-600' : 'text-slate-500'}`}>
-                       {viewingDept.status === 'Active' ? <CheckCircle size={16}/> : <X size={16}/>}
-                       {viewingDept.status}
-                    </span>
+              <div className="flex items-center gap-6">
+                 {/* Logo display in header */}
+                 <div className="w-24 h-24 rounded-2xl bg-white shadow-lg border-4 border-white overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {viewingDept.logo ? (
+                      <img src={viewingDept.logo} alt={viewingDept.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                        <Building2 size={32} />
+                      </div>
+                    )}
+                 </div>
+
+                 <div>
+                    <h1 className="text-3xl font-bold text-slate-800 mb-2">{viewingDept.name}</h1>
+                    <div className="flex items-center gap-4 text-slate-500">
+                        <span className="flex items-center gap-1.5"><MapPin size={16} className="text-indigo-500"/> {viewingDept.location || 'Main HQ'}</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                        <span className={`flex items-center gap-1.5 font-medium ${viewingDept.status === 'Active' ? 'text-green-600' : 'text-slate-500'}`}>
+                          {viewingDept.status === 'Active' ? <CheckCircle size={16}/> : <X size={16}/>}
+                          {viewingDept.status}
+                        </span>
+                    </div>
                  </div>
               </div>
-              <div className="flex gap-3">
+              
+              <div className="flex gap-3 mt-4 md:mt-0">
                  <button onClick={() => handleOpenModal(viewingDept)} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg transition-colors font-medium">
                     <Edit2 size={16}/> Edit Details
                  </button>
@@ -419,8 +465,12 @@ const Departments: React.FC = () => {
                 <tr key={dept.id} className="hover:bg-slate-50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
-                        <Building2 size={20} />
+                      <div className="w-10 h-10 rounded-lg bg-indigo-50 flex-shrink-0 flex items-center justify-center text-indigo-600 shadow-sm overflow-hidden border border-indigo-100">
+                        {dept.logo ? (
+                           <img src={dept.logo} alt={dept.name} className="w-full h-full object-cover" />
+                        ) : (
+                           <Building2 size={20} />
+                        )}
                       </div>
                       <div>
                         <div className="font-bold text-slate-800">{dept.name}</div>
@@ -438,6 +488,9 @@ const Departments: React.FC = () => {
                        <div>
                           <div className="text-sm font-medium text-slate-700">{dept.head}</div>
                           <div className="text-xs text-slate-500">{dept.email}</div>
+                          <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                             <Phone size={10} /> {dept.phone}
+                          </div>
                        </div>
                     </div>
                   </td>
@@ -499,9 +552,9 @@ const Departments: React.FC = () => {
       {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100 h-[90vh] flex flex-col">
             {/* Header */}
-            <div className="px-8 py-6 bg-gradient-to-r from-indigo-600 to-indigo-800 flex justify-between items-center text-white">
+            <div className="px-8 py-6 bg-gradient-to-r from-indigo-600 to-indigo-800 flex justify-between items-center text-white flex-shrink-0">
                <div>
                   <h3 className="text-2xl font-bold flex items-center gap-3">
                      <Building2 className="text-indigo-200" size={28} /> 
@@ -519,7 +572,53 @@ const Departments: React.FC = () => {
                </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-8 space-y-6">
+            <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-8 space-y-6">
+               
+               {/* Department Logo Section */}
+               <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Identity & Logo</h4>
+                  <div className="flex items-start gap-6">
+                     <div className="w-24 h-24 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden relative group">
+                        {formData.logo ? (
+                           <img src={formData.logo} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                           <ImageIcon className="text-slate-300" size={32} />
+                        )}
+                        {formData.logo && (
+                           <button 
+                              type="button" 
+                              onClick={() => setFormData({...formData, logo: ''})}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                           >
+                              <X size={12} />
+                           </button>
+                        )}
+                     </div>
+                     <div className="flex-1 space-y-3">
+                        <label className="block text-sm font-semibold text-slate-700">Upload or Generate Logo</label>
+                        <div className="flex gap-3">
+                           <label className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors">
+                              <Upload size={16} />
+                              Upload Image
+                              <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+                           </label>
+                           <button 
+                              type="button"
+                              onClick={handleGenerateLogo}
+                              disabled={!formData.name}
+                              className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                           >
+                              <RefreshCw size={16} />
+                              Generate Logo
+                           </button>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                           {!formData.name ? "Enter department name to generate a logo." : "Upload a PNG/JPG or generate a styled SVG."}
+                        </p>
+                     </div>
+                  </div>
+               </div>
+
                <div>
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Department Details</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -569,6 +668,16 @@ const Departments: React.FC = () => {
                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                            value={formData.email}
                            onChange={e => setFormData({...formData, email: e.target.value})}
+                        />
+                     </div>
+                     <div className="space-y-1">
+                        <label className="block text-sm font-semibold text-slate-700">Phone Number</label>
+                        <input 
+                           type="tel" 
+                           placeholder="+1 234 567 890"
+                           className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                           value={formData.phone}
+                           onChange={e => setFormData({...formData, phone: e.target.value})}
                         />
                      </div>
                   </div>
