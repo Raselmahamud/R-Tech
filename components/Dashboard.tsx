@@ -41,6 +41,25 @@ const projectStatusData = [
   { name: 'On Hold', value: 2, color: '#ef4444' },
 ];
 
+const taskActivityData = [
+  { name: 'Mon', assigned: 12, completed: 5 },
+  { name: 'Tue', assigned: 15, completed: 10 },
+  { name: 'Wed', assigned: 22, completed: 18 },
+  { name: 'Thu', assigned: 18, completed: 15 },
+  { name: 'Fri', assigned: 14, completed: 16 },
+  { name: 'Sat', assigned: 5, completed: 5 },
+  { name: 'Sun', assigned: 3, completed: 2 },
+];
+
+const payrollCostData = [
+  { name: 'Jul', salary: 42000, bonus: 3000 },
+  { name: 'Aug', salary: 43000, bonus: 2500 },
+  { name: 'Sep', salary: 43500, bonus: 4000 },
+  { name: 'Oct', salary: 44000, bonus: 3500 },
+  { name: 'Nov', salary: 45000, bonus: 5000 },
+  { name: 'Dec', salary: 46000, bonus: 8000 }, // Year end bonuses
+];
+
 const StatCard = ({ title, value, icon: Icon, color }: { title: string, value: string, icon: any, color: string }) => (
   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-md transition-shadow">
     <div>
@@ -189,6 +208,50 @@ const Dashboard: React.FC = () => {
              <div className="mt-2 text-center bg-slate-50 rounded-lg p-2 border border-slate-100">
                <p className="text-sm text-slate-500">Total this week: <span className="font-bold text-indigo-600">35</span></p>
              </div>
+          </div>
+      </div>
+
+      {/* Row 3: Performance & Costs */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Task Velocity */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-96">
+             <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-slate-800">Weekly Task Velocity</h3>
+                <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">High Efficiency</span>
+             </div>
+             <ResponsiveContainer width="100%" height="100%">
+               <BarChart data={taskActivityData}>
+                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                 <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                 <Legend iconType="circle" />
+                 <Bar dataKey="assigned" name="Assigned" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={15} />
+                 <Bar dataKey="completed" name="Completed" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={15} />
+               </BarChart>
+             </ResponsiveContainer>
+          </div>
+
+          {/* Payroll Cost Trend */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-96">
+             <div className="flex justify-between items-center mb-4">
+               <h3 className="text-lg font-bold text-slate-800">Payroll Cost Trend</h3>
+               <select className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-slate-50 text-slate-600 focus:outline-none cursor-pointer hover:bg-slate-100">
+                  <option>Last 6 Months</option>
+                  <option>Last Year</option>
+               </select>
+             </div>
+             <ResponsiveContainer width="100%" height="100%">
+               <AreaChart data={payrollCostData}>
+                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} tickFormatter={(value) => `$${value/1000}k`} />
+                 <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                 <Legend iconType="circle" />
+                 <Area type="monotone" dataKey="salary" name="Base Salary" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+                 <Area type="monotone" dataKey="bonus" name="Bonuses" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} />
+               </AreaChart>
+             </ResponsiveContainer>
           </div>
       </div>
     </div>

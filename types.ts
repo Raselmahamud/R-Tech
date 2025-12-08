@@ -107,7 +107,38 @@ export interface Department {
   logo?: string;
 }
 
-export type View = 'DASHBOARD' | 'EMPLOYEES' | 'DEPARTMENTS' | 'TASKS' | 'CRM' | 'CALENDAR' | 'IDEAS' | 'ATTENDANCE';
+// --- PAYROLL TYPES ---
+export interface PayrollRecord {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  role: string;
+  department: string;
+  month: string; // YYYY-MM
+  basicSalary: number;
+  bonus: number;
+  deductions: number;
+  netSalary: number;
+  status: 'Paid' | 'Pending' | 'Processing';
+  paymentDate?: string;
+}
+
+// --- APPOINTMENT TYPES ---
+export interface Appointment {
+  id: string;
+  title: string;
+  clientName: string;
+  contact: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:mm
+  duration: number; // minutes
+  type: 'In-Person' | 'Video Call' | 'Phone';
+  status: 'Scheduled' | 'Completed' | 'Cancelled';
+  notes?: string;
+  reminderEnabled: boolean;
+}
+
+export type View = 'DASHBOARD' | 'EMPLOYEES' | 'DEPARTMENTS' | 'TASKS' | 'CRM' | 'CALENDAR' | 'IDEAS' | 'ATTENDANCE' | 'PAYROLL' | 'PROFILE' | 'APPOINTMENTS';
 
 // --- ATTENDANCE TYPES ---
 export interface AttendanceRecord {

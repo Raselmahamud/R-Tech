@@ -9,6 +9,9 @@ import IdeaLab from './components/IdeaLab';
 import CRM from './components/CRM'; 
 import Calendar from './components/Calendar';
 import Attendance from './components/Attendance';
+import Payroll from './components/Payroll';
+import Profile from './components/Profile';
+import Appointments from './components/Appointments';
 import { View } from './types';
 import { Bell, Search, UserCircle, Settings, LogOut, ChevronDown, Check } from 'lucide-react';
 
@@ -30,10 +33,13 @@ const App: React.FC = () => {
       case 'EMPLOYEES': return <Employees />;
       case 'DEPARTMENTS': return <Departments />;
       case 'ATTENDANCE': return <Attendance />;
+      case 'PAYROLL': return <Payroll />;
       case 'TASKS': return <Tasks />;
       case 'CRM': return <CRM />;
+      case 'APPOINTMENTS': return <Appointments />;
       case 'CALENDAR': return <Calendar />;
       case 'IDEAS': return <IdeaLab />;
+      case 'PROFILE': return <Profile />;
       default: return <Dashboard />;
     }
   };
@@ -124,11 +130,14 @@ const App: React.FC = () => {
                       <p className="text-xs text-slate-500">admin@rtech.com</p>
                    </div>
                    <div className="p-2 space-y-1">
-                      <button className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-indigo-600 rounded-lg transition-colors flex items-center gap-2.5 font-medium">
+                      <button 
+                        onClick={() => { setCurrentView('PROFILE'); setIsUserMenuOpen(false); }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-indigo-600 rounded-lg transition-colors flex items-center gap-2.5 font-medium"
+                      >
                          <UserCircle size={16} className="text-slate-400" /> My Profile
                       </button>
                       <button className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-indigo-600 rounded-lg transition-colors flex items-center gap-2.5 font-medium">
-                         <Settings size={16} className="text-slate-400" /> Account Settings
+                         <Settings size={16} className="text-slate-400" /> Settings
                       </button>
                    </div>
                    <div className="p-2 border-t border-slate-50">

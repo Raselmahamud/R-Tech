@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { View } from '../types';
-import { LayoutDashboard, Users, CheckSquare, Briefcase, Calendar, Lightbulb, LogOut, Settings, Clock, Building2 } from 'lucide-react';
+import { LayoutDashboard, Users, CheckSquare, Briefcase, Calendar, Lightbulb, LogOut, Settings, Clock, Building2, CreditCard, CalendarCheck } from 'lucide-react';
 
 interface SidebarProps {
   currentView: View;
@@ -14,8 +14,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
     { id: 'EMPLOYEES', label: 'Employees', icon: Users },
     { id: 'DEPARTMENTS', label: 'Departments', icon: Building2 },
     { id: 'ATTENDANCE', label: 'Attendance', icon: Clock },
+    { id: 'PAYROLL', label: 'Payroll', icon: CreditCard },
     { id: 'TASKS', label: 'Task Tracker', icon: CheckSquare },
     { id: 'CRM', label: 'CRM / Customers', icon: Briefcase },
+    { id: 'APPOINTMENTS', label: 'Appointments', icon: CalendarCheck },
     { id: 'CALENDAR', label: 'Calendar', icon: Calendar },
     { id: 'IDEAS', label: 'Idea Lab & AI', icon: Lightbulb },
   ];
@@ -46,15 +48,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
           </button>
         ))}
       </nav>
-
-      <div className="p-4 border-t border-slate-800 space-y-2">
-        <button className="w-full flex items-center gap-3 px-4 py-2 hover:text-white transition-colors text-sm">
-          <Settings size={18} /> Settings
-        </button>
-        <button className="w-full flex items-center gap-3 px-4 py-2 hover:text-red-400 transition-colors text-sm text-red-500">
-          <LogOut size={18} /> Logout
-        </button>
-      </div>
     </div>
   );
 };

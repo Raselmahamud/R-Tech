@@ -3,21 +3,22 @@ import React, { useState } from 'react';
 import { AttendanceRecord } from '../types';
 import { 
   Search, Calendar, Filter, Download, ChevronLeft, ChevronRight, 
-  Clock, AlertCircle, CheckCircle2, UserX, Sun
+  Clock, AlertCircle, CheckCircle2, UserX, Sun, Plus, X, Save, User
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
+// Employees List for Selection
+const EMPLOYEES = [
+  { id: '1', name: 'Rahim Khan', role: 'Manager' },
+  { id: '2', name: 'Sultana Jasmine', role: 'Developer' },
+  { id: '3', name: 'Karim Ullah', role: 'Designer' },
+  { id: '4', name: 'David Smith', role: 'HR' },
+  { id: '5', name: 'Fatima Begum', role: 'Developer' },
+];
 
 // Mock Data Generator
 const generateMockAttendance = (): AttendanceRecord[] => {
   const records: AttendanceRecord[] = [];
-  const employees = [
-    { id: '1', name: 'Rahim Khan', role: 'Manager' },
-    { id: '2', name: 'Sultana Jasmine', role: 'Developer' },
-    { id: '3', name: 'Karim Ullah', role: 'Designer' },
-    { id: '4', name: 'David Smith', role: 'HR' },
-    { id: '5', name: 'Fatima Begum', role: 'Developer' },
-  ];
-
   const statuses: AttendanceRecord['status'][] = ['Present', 'Late', 'Absent', 'Half Day', 'Present', 'Present', 'Late'];
   
   // Generate for last 7 days
@@ -26,7 +27,7 @@ const generateMockAttendance = (): AttendanceRecord[] => {
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
 
-    employees.forEach(emp => {
+    EMPLOYEES.forEach(emp => {
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
       let checkIn = null;
       let checkOut = null;
@@ -62,12 +63,21 @@ const generateMockAttendance = (): AttendanceRecord[] => {
   return records;
 };
 
-const MOCK_DATA = generateMockAttendance();
-
 const Attendance: React.FC = () => {
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>(() => generateMockAttendance());
   const [filterType, setFilterType] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newRecord, setNewRecord] = useState({
+    employeeId: '',
+    date: new Date().toISOString().split('T')[0],
+    checkIn: '09:00',
+    checkOut: '18:00',
+    status: 'Present'
+  });
 
   // Date Navigation Logic
   const handlePrev = () => {
@@ -86,9 +96,52 @@ const Attendance: React.FC = () => {
     setCurrentDate(newDate);
   };
 
+  // Handle Log Attendance Save
+  const handleSaveAttendance = (e: React.FormEvent) => {
+    e.preventDefault();
+    const emp = EMPLOYEES.find(e => e.id === newRecord.employeeId);
+    if (!emp) return;
+
+    // Helper to format 24h time input to 12h AM/PM
+    const formatTime = (t: string) => {
+      if (!t) return null;
+      const [h, m] = t.split(':');
+      const hour = parseInt(h);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const h12 = hour % 12 || 12;
+      return `${h12}:${m} ${ampm}`;
+    };
+
+    // Calculate work hours
+    let hours = 0;
+    if (newRecord.status !== 'Absent' && newRecord.status !== 'On Leave') {
+      const start = new Date(`2000-01-01T${newRecord.checkIn}`);
+      const end = new Date(`2000-01-01T${newRecord.checkOut}`);
+      const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      hours = diff > 0 ? parseFloat(diff.toFixed(2)) : 0;
+    }
+
+    const record: AttendanceRecord = {
+      id: Date.now().toString(),
+      employeeId: emp.id,
+      employeeName: emp.name,
+      role: emp.role,
+      date: newRecord.date,
+      checkIn: newRecord.status === 'Absent' || newRecord.status === 'On Leave' ? null : formatTime(newRecord.checkIn),
+      checkOut: newRecord.status === 'Absent' || newRecord.status === 'On Leave' ? null : formatTime(newRecord.checkOut),
+      status: newRecord.status as any,
+      workHours: hours
+    };
+
+    setAttendanceData([record, ...attendanceData]);
+    setIsModalOpen(false);
+    // Reset form for next entry, keeping date same
+    setNewRecord(prev => ({ ...prev, employeeId: '', status: 'Present', checkIn: '09:00', checkOut: '18:00' }));
+  };
+
   // Filter Data Logic
   const getFilteredData = () => {
-    const filtered = MOCK_DATA.filter(record => {
+    const filtered = attendanceData.filter(record => {
       const recordDate = new Date(record.date);
       let match = false;
 
@@ -148,6 +201,12 @@ const Attendance: React.FC = () => {
           <p className="text-slate-500">Monitor employee check-ins, working hours, and availability.</p>
         </div>
         <div className="flex items-center gap-3">
+           <button 
+             onClick={() => setIsModalOpen(true)}
+             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium shadow-lg shadow-indigo-200"
+           >
+              <Plus size={16}/> Log Attendance
+           </button>
            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium">
               <Download size={16}/> Export Report
            </button>
@@ -347,6 +406,113 @@ const Attendance: React.FC = () => {
            </div>
         </div>
       </div>
+
+      {/* Log Attendance Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in p-4">
+           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+              <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white flex justify-between items-center">
+                 <div>
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                       <Clock size={20} className="text-indigo-200" /> Log Attendance
+                    </h3>
+                    <p className="text-xs text-indigo-100 opacity-90">Manually record daily attendance.</p>
+                 </div>
+                 <button onClick={() => setIsModalOpen(false)} className="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-all">
+                    <X size={18} />
+                 </button>
+              </div>
+
+              <form onSubmit={handleSaveAttendance} className="p-6 space-y-4">
+                 <div className="space-y-1">
+                    <label className="block text-sm font-semibold text-slate-700">Employee <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                       <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                       <select 
+                          required
+                          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none"
+                          value={newRecord.employeeId}
+                          onChange={(e) => setNewRecord({...newRecord, employeeId: e.target.value})}
+                       >
+                          <option value="">Select Employee</option>
+                          {EMPLOYEES.map(emp => (
+                             <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
+                          ))}
+                       </select>
+                    </div>
+                 </div>
+
+                 <div className="space-y-1">
+                    <label className="block text-sm font-semibold text-slate-700">Date <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                       <input 
+                          required
+                          type="date" 
+                          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                          value={newRecord.date}
+                          onChange={(e) => setNewRecord({...newRecord, date: e.target.value})}
+                       />
+                    </div>
+                 </div>
+
+                 <div className="space-y-1">
+                    <label className="block text-sm font-semibold text-slate-700">Status</label>
+                    <select 
+                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                       value={newRecord.status}
+                       onChange={(e) => setNewRecord({...newRecord, status: e.target.value})}
+                    >
+                       <option value="Present">Present</option>
+                       <option value="Late">Late</option>
+                       <option value="Half Day">Half Day</option>
+                       <option value="Absent">Absent</option>
+                       <option value="On Leave">On Leave</option>
+                    </select>
+                 </div>
+
+                 {(newRecord.status !== 'Absent' && newRecord.status !== 'On Leave') && (
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1">
+                          <label className="block text-sm font-semibold text-slate-700">Check In</label>
+                          <input 
+                             type="time" 
+                             className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+                             value={newRecord.checkIn}
+                             onChange={(e) => setNewRecord({...newRecord, checkIn: e.target.value})}
+                          />
+                       </div>
+                       <div className="space-y-1">
+                          <label className="block text-sm font-semibold text-slate-700">Check Out</label>
+                          <input 
+                             type="time" 
+                             className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+                             value={newRecord.checkOut}
+                             onChange={(e) => setNewRecord({...newRecord, checkOut: e.target.value})}
+                          />
+                       </div>
+                    </div>
+                 )}
+
+                 <div className="pt-4 flex justify-end gap-3">
+                    <button 
+                       type="button" 
+                       onClick={() => setIsModalOpen(false)}
+                       className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                       Cancel
+                    </button>
+                    <button 
+                       type="submit"
+                       className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-lg shadow-indigo-200"
+                    >
+                       <Save size={16} /> Save Record
+                    </button>
+                 </div>
+              </form>
+           </div>
+        </div>
+      )}
     </div>
   );
 };
